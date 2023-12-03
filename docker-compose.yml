@@ -1,0 +1,35 @@
+---
+version: '3.1'
+services:
+  odoo:
+    environment:
+      HOST: db
+      PORT: 5432
+      USER: odoo
+      PASSWORD: odoo
+    image: odoo:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8069:8069"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - "./tests/resources/odoo.conf:/etc/odoo/odoo.conf"
+      - "./tests/resources:/mnt/restore"
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "odoo"]
+      interval: 10s
+      retries: 5
+      start_period: 5s

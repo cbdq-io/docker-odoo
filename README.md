@@ -1,2 +1,2 @@
 # docker-odoo
-Docker image for Odoo
+Docker image for Odoo.
