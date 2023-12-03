@@ -1,5 +1,5 @@
 ---
-name: CI
+name: Odoo
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  CI:
+  Odoo:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     runs-on: ubuntu-latest
 
@@ -23,5 +23,23 @@ jobs:
       - name: Build
         run: make build
 
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
       - name: Test
         run: make test
+
+      - name: Push latest
+        if: github.ref == 'refs/heads/develop'
+        run: make pushLatest
+
+      - name: Push Tag
+        if: github.ref == 'refs/heads/main'
+        run: make pushTag

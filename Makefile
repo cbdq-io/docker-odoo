@@ -1,13 +1,25 @@
+TAG := $(shell date -u +"16-%Y%m%dT%H%M" )
+
 all: lint build test
 
 build:
-	docker build --tag odoo:latest .
+	docker build \
+          --tag odoo:latest \
+	  --tag ghcr.io/cbdq-io/odoo:latest \
+	  --tag ghcr.io/cbdq-io/odoo:$(TAG) \
+	  .
 
 clean:
 	docker compose down -t 0
 
 lint:
 	docker run --rm -i hadolint/hadolint < Dockerfile
+
+pushLatest:
+	docker push ghcr.io/cbdq-io/odoo:latest
+
+pushTag:
+	docker push ghcr.io/cbdq-io/odoo:$(TAG)
 
 test:
 	docker compose up -d --wait odoo
