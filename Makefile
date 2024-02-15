@@ -1,4 +1,4 @@
-TAG := $(shell date -u +"16-%Y%m%dT%H%M" )
+TAG := $(shell date -u +"16-%Y%m%dT%HZ" )
 
 all: lint build test
 
