@@ -1,16 +1,19 @@
-#!/bin/sh -e
+#!/bin/bash
 
 BASE_URL='http://localhost:8069'
+MAX_ATTEMPTS=6
+PROG=$( basename "$0" )
 
-while getopts "a:d:f:u:" arg; do
+while getopts "a:d:f:hm:u:" arg; do
   case $arg in
     a) ADMIN_PASSWORD="${OPTARG}" ;;
     d) DB_NAME="${OPTARG}" ;;
     f) FILE_NAME="${OPTARG}" ;;
     h)
-      echo "usage: $( basname $0 ) -a admin_password -d db_name -u base_URL"
+      echo "usage: ${PROG} -a admin_password -d db_name -u base_URL"
       exit 0
       ;;
+    m) MAX_ATTEMPTS="${OPTARG}" ;;
     u) BASE_URL="${OPTARG}" ;;
     *) exit 2 ;;
   esac
@@ -36,8 +39,27 @@ if [ -z "$BASE_URL" ]; then
   exit 1
 fi
 
-curl -s -F "master_pwd=${ADMIN_PASSWORD}" \
-  -F "name=${DB_NAME}" "${BASE_URL}/web/database/drop"
-curl -s -F "master_pwd=${ADMIN_PASSWORD}" \
+status=1
+attempts=0
+
+while (( status != 0 )); do
+  curl -sL --fail "${BASE_URL}/web_editor/static/src/xml/ace.xml" > /dev/null
+  status="$?"
+  (( attempts += 1 ))
+
+  if (( status == 0 )); then
+    echo "INFO: Odoo is ready for a restore."
+  elif (( attempts > MAX_ATTEMPTS )); then
+    echo "ERROR: Odoo not ready on ${BASE_URL}"
+    exit 1
+  else
+    echo "WARNING: Odoo on ${BASE_URL} is not ready (attempt ${attempts} of ${MAX_ATTEMPTS})."
+    sleep 10
+  fi
+done
+
+curl -sL -F "master_pwd=${ADMIN_PASSWORD}" \
+  -F "name=${DB_NAME}" "${BASE_URL}/web/database/drop" > /dev/null
+curl --fail -sL -F "master_pwd=${ADMIN_PASSWORD}" \
   -F "backup_file=@${FILE_NAME}" -F 'copy=true' \
-  -F "name=${DB_NAME}" "${BASE_URL}/web/database/restore"
+  -F "name=${DB_NAME}" "${BASE_URL}/web/database/restore" > /dev/null
