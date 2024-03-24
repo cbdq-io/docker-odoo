@@ -58,8 +58,10 @@ while (( status != 0 )); do
   fi
 done
 
+echo "INFO: Dropping DB ${DB_NAME}."
 curl -sL -F "master_pwd=${ADMIN_PASSWORD}" \
   -F "name=${DB_NAME}" "${BASE_URL}/web/database/drop" > /dev/null
+echo "INFO: Restoring DB ${DB_NAME} from file://${FILE_NAME}."
 curl --fail -sL -F "master_pwd=${ADMIN_PASSWORD}" \
   -F "backup_file=@${FILE_NAME}" -F 'copy=true' \
   -F "name=${DB_NAME}" "${BASE_URL}/web/database/restore" > /dev/null
