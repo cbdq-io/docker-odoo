@@ -21,6 +21,9 @@ pushLatest:
 pushTag:
 	docker push ghcr.io/cbdq-io/odoo:$(TAG)
 
+releaseBranch:
+	git flow release start $(TAG)
+
 test:
 	docker compose up -d --wait odoo
 	docker compose exec odoo /usr/local/bin/restore.sh -a secret -d odoo -f /mnt/restore/odoo.zip
@@ -29,3 +32,6 @@ test:
 
 trivy:
 	trivy image --ignore-unfixed odoo:latest
+
+update-trivy-ignore:
+	trivy image --format json --ignore-unfixed --severity HIGH,CRITICAL odoo:latest | jq -r '.Results[1].Vulnerabilities[].VulnerabilityID' | sort -u | tee .trivyignore
