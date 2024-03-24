@@ -34,4 +34,4 @@ trivy:
 	trivy image --ignore-unfixed odoo:latest
 
 update-trivy-ignore:
-	trivy image --format json --ignore-unfixed --severity HIGH,CRITICAL flyte:latest | jq -r '.Results[1].Vulnerabilities[].VulnerabilityID' | sort -u | tee .trivyignore
+	trivy image --format json --ignore-unfixed --severity HIGH,CRITICAL odoo:latest | jq -r '.Results[1].Vulnerabilities[].VulnerabilityID' | sort -u | tee .trivyignore
