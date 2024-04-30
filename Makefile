@@ -12,6 +12,10 @@ build:
 clean:
 	docker compose down -t 0
 
+cleanall: clean
+	docker system prune --all --force
+	docker volume prune --all --force
+
 lint:
 	docker run --rm -i hadolint/hadolint < Dockerfile
 
