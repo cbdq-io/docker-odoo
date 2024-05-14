@@ -28,6 +28,8 @@ pushTag:
 releaseBranch:
 	git flow release start $(TAG)
 
+tag:
+	@echo $(TAG)
 test:
 	docker compose up -d --wait odoo
 	docker compose exec odoo /usr/local/bin/restore.sh -a secret -d odoo -f /mnt/restore/odoo.zip
