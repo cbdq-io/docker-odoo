@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -ex
+set -e
 
 wait-for-psql.py \
   --db_host "${HOST}" \
@@ -9,4 +9,4 @@ wait-for-psql.py \
   --db_password "${PASSWORD}" \
   --timeout=5
 
-curl --fail --silent http://localhost:8069/web_editor/static/src/xml/ace.xml > /dev/null
+curl --fail --silent localhost:8069/web/health > /dev/null
