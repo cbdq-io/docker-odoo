@@ -43,7 +43,7 @@ status=1
 attempts=0
 
 while (( status != 0 )); do
-  curl -sL --fail "${BASE_URL}/web_editor/static/src/xml/ace.xml" > /dev/null
+  curl -sL --fail "${BASE_URL}/web/health" > /dev/null
   status="$?"
   (( attempts += 1 ))
 
