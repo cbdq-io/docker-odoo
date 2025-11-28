@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Docker login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -31,7 +31,7 @@ jobs:
           echo "Tags from GitHub:"
           echo "$tags"
 
-          semver_tag=$(echo "$tags" | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
+          semver_tag=$(echo "$tags" | sort -V | tail -n1)
 
           if [ -z "$semver_tag" ]; then
             echo "❌ No valid SemVer tags found."
@@ -42,22 +42,23 @@ jobs:
           echo "tag=$semver_tag" >> $GITHUB_OUTPUT
 
       - name: Run Trivy scan and output SARIF
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.33.1
         continue-on-error: true
         with:
-          image-ref: ghcr.io/${{ github.repository }}:${{ steps.get-tag.outputs.tag }}
+          image-ref: ghcr.io/cbdq-io/odoo:${{ steps.get-tag.outputs.tag }}
           format: sarif
           output: trivy-results.sarif
           severity: MEDIUM,HIGH,CRITICAL
 
       - name: Upload SARIF file to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
 
       - name: Check if Trivy report contains vulnerabilities
         id: check-vulns
         run: |
+          jq . trivy-results.sarif
           count=$(jq '.runs[0].results | length' trivy-results.sarif)
           echo "Vulnerability count: $count"
           echo "count=$count" >> $GITHUB_OUTPUT
@@ -65,7 +66,7 @@ jobs:
       - name: Generate Trivy issue summary
         if: steps.check-vulns.outputs.count != '0'
         run: |
-          echo "# Vulnerabilities found in image \`ghcr.io/${{ github.repository }}:${{ steps.get-tag.outputs.tag }}\`" > trivy-results.md
+          echo "# Vulnerabilities found in image \`ghcr.io/cbdq-io/odoo:${{ steps.get-tag.outputs.tag }}\`" > trivy-results.md
           echo "" >> trivy-results.md
           echo "**Scan summary:**" >> trivy-results.md
           jq -r '.runs[0].results[] | "- \(.ruleId) in \(.locations[0].physicalLocation.artifactLocation.uri): \(.message.text)"' trivy-results.sarif >> trivy-results.md
@@ -74,7 +75,7 @@ jobs:
 
       - name: Create GitHub Issue for Vulnerabilities
         if: steps.check-vulns.outputs.count != '0'
-        uses: peter-evans/create-issue-from-file@v5
+        uses: peter-evans/create-issue-from-file@v6
         with:
           title: "Trivy Scan: Vulnerabilities found in image `${{ steps.get-tag.outputs.tag }}`"
           content-filepath: trivy-results.md
