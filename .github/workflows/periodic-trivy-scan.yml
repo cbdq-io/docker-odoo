@@ -31,7 +31,7 @@ jobs:
           echo "Tags from GitHub:"
           echo "$tags"
 
-          semver_tag=$(echo "$tags" | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
+          semver_tag=$(echo "$tags" | sort -V | tail -n1)
 
           if [ -z "$semver_tag" ]; then
             echo "❌ No valid SemVer tags found."
