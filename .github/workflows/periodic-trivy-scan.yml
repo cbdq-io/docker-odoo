@@ -45,7 +45,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.30.0
         continue-on-error: true
         with:
-          image-ref: ghcr.io/${{ github.repository }}:${{ steps.get-tag.outputs.tag }}
+          image-ref: ghcr.io/cbdq-io/odoo:${{ steps.get-tag.outputs.tag }}
           format: sarif
           output: trivy-results.sarif
           severity: MEDIUM,HIGH,CRITICAL
@@ -65,7 +65,7 @@ jobs:
       - name: Generate Trivy issue summary
         if: steps.check-vulns.outputs.count != '0'
         run: |
-          echo "# Vulnerabilities found in image \`ghcr.io/${{ github.repository }}:${{ steps.get-tag.outputs.tag }}\`" > trivy-results.md
+          echo "# Vulnerabilities found in image \`ghcr.io/cbdq-io/odoo:${{ steps.get-tag.outputs.tag }}\`" > trivy-results.md
           echo "" >> trivy-results.md
           echo "**Scan summary:**" >> trivy-results.md
           jq -r '.runs[0].results[] | "- \(.ruleId) in \(.locations[0].physicalLocation.artifactLocation.uri): \(.message.text)"' trivy-results.sarif >> trivy-results.md
