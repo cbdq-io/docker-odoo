@@ -58,6 +58,7 @@ jobs:
       - name: Check if Trivy report contains vulnerabilities
         id: check-vulns
         run: |
+          jq . trivy-results.sarif
           count=$(jq '.runs[0].results | length' trivy-results.sarif)
           echo "Vulnerability count: $count"
           echo "count=$count" >> $GITHUB_OUTPUT
