@@ -2,7 +2,7 @@ FROM odoo:17
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-USER root
+USER 0
 
 COPY --chmod=755 healthcheck.sh /usr/local/bin/healthcheck.sh
 COPY --chmod=755 backup.sh /usr/local/bin/backup.sh
@@ -16,4 +16,4 @@ RUN apt-get clean \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-USER odoo
+USER 101
