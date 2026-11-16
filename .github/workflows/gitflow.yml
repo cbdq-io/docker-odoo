@@ -28,7 +28,7 @@ jobs:
         run: echo "RELEASE_CANDIDATE_TAG=$( make tag )" >> $GITHUB_OUTPUT
 
       - name: Git Flow Action
-        uses: cbdq-io/gitflow-action@1.0.8
+        uses: cbdq-io/gitflow-action@1.1.2
         env:
           # Setting this environment variable means we can debug by re-running
           # workflows and ticking "Enable debug logging".
@@ -38,3 +38,4 @@ jobs:
         with:
           # Set the release candidate to be the output of the previous step.
           release-candidate: ${{ steps.version.outputs.RELEASE_CANDIDATE_TAG }}
+          post-release-pr-assignees: cbdqbot
